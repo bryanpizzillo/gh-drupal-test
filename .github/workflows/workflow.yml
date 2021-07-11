@@ -38,7 +38,7 @@ jobs:
       ## Install BLT and Drush Launchers
       - name: Install BLT and Drush Launchers
         run: |
-          curl -sL -o /usr/local/bin/drush https://github.com/drush-ops/drush-launcher/releases/download/latest/drush.phar && chmod +x /usr/local/bin/drush
+          curl -sL -o /usr/local/bin/drush https://github.com/drush-ops/drush-launcher/releases/download/0.6.0/drush.phar && chmod +x /usr/local/bin/drush
           curl -sL -o /usr/local/bin/blt https://github.com/acquia/blt-launcher/releases/latest/download/blt.phar && chmod +x /usr/local/bin/blt
       - name: Test
         run: |
