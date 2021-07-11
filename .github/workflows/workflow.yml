@@ -12,7 +12,9 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
-          tools: composer:v1
+          ## This list of extensions matches those we install with our docker file.
+          extensions: bz2, cli, common, curl, fpm, gd, json, mbstring, memcached, mysql, oauth, opcache, readline, sqlite3, soap, xdebug, xml
+          tools: composer:v1, prestissimo
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
