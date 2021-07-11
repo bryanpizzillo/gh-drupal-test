@@ -5,6 +5,9 @@ jobs:
     name: Build, Test and Upload Artifacts
     runs-on: ubuntu-latest
     steps:
+      ## This clones and checks out.
+      - name: Checkout branch
+        uses: actions/checkout@v2
       - name: Setup PHP with tools
         uses: shivammathur/setup-php@v2
         with:
