@@ -1,0 +1,47 @@
+<?php
+
+/**
+ * @file
+ * Contains cgov_article.module.
+ */
+
+/**
+ * Implements hook_field_widget_form_alter().
+ *
+ * Limits allowed text formats using the cgov_core form_tools service.
+ */
+function cgov_article_field_widget_form_alter(&$element, $form_state, $context) {
+  // Maps field names to an array containing a single format.
+  $map = [
+    'field_body_section_heading' => ['simple'],
+    'field_body_section_content' => ['full_html'],
+  ];
+  $formHelper = \Drupal::service('cgov_core.form_tools');
+  $formHelper->allowTextFormats($map, $element, $context);
+}
+
+/**
+ * Preprocess function for field templates.
+ */
+function cgov_article_preprocess_field(&$variables) {
+  if ($variables['element']['#field_name'] == 'field_article_body') {
+    // Get the schema.org type for use in field templates.
+    $node = \Drupal::routeMatch()->getParameter('node');
+    $schema_org_type = $node->field_schema_org_data->page_itemtype;
+    if ($schema_org_type == 'faq_page') {
+      $variables['schema_org_type'] = $schema_org_type;
+    }
+  }
+}
+
+/**
+ * Preprocess function for paragraph templates.
+ */
+function cgov_article_preprocess_paragraph__body_section(&$variables) {
+  // Get the schema.org type for use in paragraph templates.
+  $parent = $variables['paragraph']->getParentEntity();
+  $schema_org_type = $parent->field_schema_org_data->page_itemtype;
+  if ($schema_org_type == 'faq_page') {
+    $variables['schema_org_type'] = $schema_org_type;
+  }
+}

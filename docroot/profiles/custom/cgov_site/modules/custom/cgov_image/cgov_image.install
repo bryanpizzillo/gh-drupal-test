@@ -1,0 +1,77 @@
+<?php
+
+/**
+ * @file
+ * Contains cgov_image.install.
+ */
+
+use Drupal\cgov_core\CgovCoreTools;
+
+/**
+ * Implements hook_install().
+ *
+ * Attach our images types to the right workflow.
+ */
+function cgov_image_install() {
+  $tools = \Drupal::service('cgov_core.tools');
+
+  // Add Roles.
+  $tools->addRole('image_manager', 'Image Manager', -7);
+
+  foreach (['cgov_image', 'cgov_contextual_image'] as $image_type) {
+    // Add content type permissions.
+    $tools->addMediaTypePermissions($image_type, 'image_manager');
+    $tools->attachMediaTypeToWorkflow($image_type, 'simple_workflow');
+  }
+
+  // Attach image carousel to right workflow.
+  $tools->attachBlockContentTypeToWorkflow('cgov_image_carousel', 'simple_workflow');
+
+  // Install permissions for this module.
+  _cgov_image_install_permissions($tools);
+}
+
+/**
+ * Installs permissions for this module.
+ *
+ * @param \Drupal\cgov_core\CgovCoreTools $siteHelper
+ *   Cgov tools service.
+ */
+function _cgov_image_install_permissions(CgovCoreTools $siteHelper) {
+  $perms = [
+    'admin_ui' => [
+      'access cgov_embedded_image_browser entity browser pages',
+      'access cgov_image_browser entity browser pages',
+      'access cgov_image_carousel_image_browser entity browser pages',
+    ],
+    'image_manager' => [
+      'use simple_workflow transition create_new_draft',
+      'use simple_workflow transition publish',
+    ],
+  ];
+
+  $siteHelper->addRolePermissions($perms);
+}
+
+/**
+ * Update for v1.1.6.
+ *
+ * Install ImageMagick as an image manipulation toolkit.
+ */
+function cgov_image_update_8001() {
+  if (!\Drupal::moduleHandler()->moduleExists('imagemagick')) {
+    $installer = \Drupal::service('module_installer');
+    $installer->install(['imagemagick']);
+  }
+}
+
+/**
+ * Update for Special Report.
+ *
+ * Force installation of borderless card node.view_mode prior to view display.
+ */
+function cgov_image_update_8002() {
+    $service = \Drupal::service('features.manager');
+    $result = $service->import(['cgov_image']);
+}
+

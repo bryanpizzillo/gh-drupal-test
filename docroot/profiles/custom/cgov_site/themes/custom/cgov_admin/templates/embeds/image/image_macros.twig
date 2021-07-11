@@ -1,0 +1,98 @@
+{#
+/**
+ * @file
+ * Theme macros for displaying article images.
+ */
+#}
+
+
+{# Renders an article image  #}
+{% macro articleImage(classes, image, enlarge_uri, credit, caption, link_text = 'Enlarge') %}
+
+  {# Set up the classes for the figure #}
+  {% set attr = create_attribute() %}
+  {% set attr = attr.addClass(classes) %}
+  {% set attr = attr.addClass('centered-set') %}
+
+  {# Links to infographics also use this macro but need a different class to allow them to use a chevron sprite.
+  We're cheating and hooking on to an unrelated variable that tells us whether this is an infographic or not. #}
+  {% set classForSpriteSelection = link_text == 'View Infographic' ? 'infographic-view-full' : 'article-image-enlarge' %}
+
+  <figure{{ attr }}>
+      <div class="centered-element">
+        {{ image }}
+        {% if enlarge_uri %}
+          <a href="{{enlarge_uri}}"
+            target="_blank"
+            class="{{classForSpriteSelection}} no-resize"
+          >{{ link_text|trans }}</a>
+        {% endif %}
+      </div>
+      {% if caption|render|striptags|trim or credit  %}
+        <figcaption>
+          <div class="caption-container no-resize">
+            {% if caption %}
+              <p>{{caption}}</p>
+            {% endif %}
+
+            {% if credit %}
+              <div class="image-photo-credit">{% trans %}Credit{% endtrans %}: {{ strip_duplicate_leading_credit(credit) }}</div>
+            {% endif %}
+          </div>
+        </figcaption>
+      {% endif %}
+  </figure>
+
+{% endmacro %}
+
+{# Renders an infographic image  #}
+{% macro infographicImage(
+  classes, 
+  infographic_desktop,
+  infographic_mobile,
+  enlarge_uri,
+  caption,
+  link_text = 'View and Print Infographic') %}
+
+  {# Set up the classes for the figure #}
+  {% set attr = create_attribute() %}
+  {% set attr = attr.addClass(classes) %}
+  {% set attr = attr.addClass('centered-set') %}
+
+  {# Links to infographics also use this macro but need a different class to allow them to use a chevron sprite.
+  We're cheating and hooking on to an unrelated variable that tells us whether this is an infographic or not. #}
+  {% set classForSpriteSelection = link_text == 'View Infographic' ? 'infographic-view-full' : 'article-image-enlarge' %}
+
+{% set infographic_desktop_uri = file_url(infographic_desktop['#items'].entity.uri.value) %}
+{% set infographic_mobile_uri = null %}
+
+{% if infographic_mobile['#items'].entity.uri.value is not empty %}
+  {% set infographic_mobile_uri = file_url(infographic_mobile['#items'].entity.uri.value) %}
+{% endif %}
+
+  <figure{{ attr }}>
+      <div class="centered-element">
+        {% if infographic_mobile_uri is not empty %}
+          <picture>
+              <source srcset="{{infographic_mobile_uri}}" media="(max-width: 768px)">
+              <source srcset="{{infographic_desktop_uri}}" media="(min-width: 769px)">
+           {{infographic_desktop}}
+          </picture>
+        {% else %}
+          {# if no infographic mobile, just render as an image #}
+          {{ infographic_desktop }}
+        {% endif %}
+      </div>
+        <figcaption>
+           {% if content.field_caption|render|striptags|trim %}
+            <div class="caption-container no-resize">
+                {{ content.field_caption }}
+            </div>
+          {% endif %}
+          <div class="caption-container">
+            <a href="{{infographic_uri}}" class="infographic-link" target="_blank">{{ link_text|trans }}</a>
+          </div>  
+        </figcaption>
+  </figure>
+
+{% endmacro %}

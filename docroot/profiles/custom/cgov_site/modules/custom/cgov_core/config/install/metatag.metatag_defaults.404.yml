@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies: {  }
+id: '404'
+label: '404 page not found'
+tags:
+  canonical_url: '[site:url]'
+  shortlink: '[site:url]'
+  title: 'Page Not Found - [cgov_tokens:cgov-trans-org-name]'
+  dcterms_subject: 'Error Pages'
+  dcterms_type: errorpage

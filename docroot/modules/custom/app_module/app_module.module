@@ -1,0 +1,214 @@
+<?php
+
+/**
+ * @file
+ * Contains app_module.module.
+ */
+
+use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\app_module\Entity\AppModule;
+
+/**
+ * Implements hook_theme().
+ */
+function app_module_theme($existing, $type, $theme, $path) {
+
+  return [
+    'app_module' => [
+      'render element' => 'elements',
+    ],
+  ];
+}
+
+/**
+ * Implements template_preprocess_HOOK().
+ */
+function template_preprocess_app_module(&$variables) {
+  $variables['configuration'] = $variables['elements']['#configuration'];
+  $variables['app_module_id'] = $variables['elements']['#app_module_id'];
+  $variables['app_module_plugin_id'] = $variables['elements']['#app_module_plugin_id'];
+  $variables['app_route_id'] = $variables['elements']['#app_route_id'];
+  $variables['content'] = $variables['elements']['content'];
+
+  // Create a valid HTML ID and make sure it is unique.
+  // There should be only 1 app module instance on a page.
+  if (!empty($variables['elements']['#id'])) {
+    $variables['attributes']['id'] = Html::getUniqueId('app-module-' . $variables['elements']['#app_module_id']);
+  }
+
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function app_module_theme_suggestions_app_module(array $variables) {
+  $suggestions = [];
+  $app_module_id = $variables['elements']['#app_module_id'];
+  $app_module_plugin_id = $variables['elements']['#app_module_plugin_id'];
+  $app_route_id = $variables['elements']['#app_route_id'];
+
+  // Just app_module to start.
+  $suggestions[] = 'app_module';
+
+  // Do the plugin.
+  $suggestions[] = 'app_module__' . $app_module_plugin_id;
+
+  // Plugin + route.
+  $suggestions[] = 'app_module__' .
+    $app_module_plugin_id . '__' .
+    $app_route_id;
+
+  // App Module ID.
+  $suggestions[] = 'app_module__' . $app_module_id;
+
+  // App Module ID + plugin.
+  $suggestions[] = 'app_module__' .
+    $app_module_id . '__' .
+    $app_module_plugin_id;
+
+  // App Module ID + plugin + path.
+  $suggestions[] = 'app_module__' .
+    $app_module_id . '__' .
+    $app_module_plugin_id . '__' .
+    $app_route_id;
+
+  return $suggestions;
+}
+
+/*
+ * Below are hook implmentations for keeping our aliases up to date with
+ * the system's aliases. (Insert is not needed because we should only insert
+ * when an entity HAS an app module, and we would not know that here.)
+ */
+
+/**
+ * Implements hook_path_update().
+ */
+function app_module_path_update(array $path) {
+  /* If the owner_pid can be found, then we should update the
+   * owner_alias. ASSUMPTION: the source cannot change.
+   */
+  \Drupal::service('app_module.app_path_manager')->updateAliasFromPath($path);
+}
+
+/**
+ * Implements hook_path_delete().
+ */
+function app_module_path_delete($path) {
+  /* If the owner_pid can be found, then we should delete
+   * the item.
+   */
+  if ($path) {
+    \Drupal::service('app_module.app_path_manager')->deleteByPath($path);
+  }
+}
+
+/*
+ * These are the hooks to allow our app module to interact with metadata.
+ */
+
+/**
+ * Implements hook_page_attachments_alter().
+ */
+function app_module_page_attachments_alter(array &$attachments) {
+  $request_query = \Drupal::request()->query;
+  $app_module_id = $request_query->get('app_module_id');
+  $app_module_route = $request_query->get('app_module_route');
+  $app_module_data = $request_query->get('app_module_data');
+
+  // We are not rendering an app module, so exit.
+  if (!$app_module_id) {
+    return;
+  }
+
+  // Get the app module entity.
+  /* @var \Drupal\app_module\AppModuleInterface */
+  $app_module = AppModule::load($app_module_id);
+
+  if (!$app_module) {
+    // How could this happen exactly, I don't know.
+    throw new \Exception("Request parameters indicate app module loaded, but app module does not exist.");
+  }
+
+  // Load the app module plugin.
+  /* @var \Drupal\app_module\Plugin\app_module\AppModulePluginInterface */
+  $app_module_plugin = $app_module->getAppModulePlugin();
+
+  if (!$app_module_plugin) {
+    // How could this happen exactly, I don't know.
+    throw new \Exception("Request parameters indicate app module loaded, but app module plugin could not be loaded.");
+  }
+
+  if ($app_module_plugin) {
+    $app_module_plugin->alterPageAttachments($attachments, $app_module_route, (array) $app_module_data);
+  }
+
+}
+
+/**
+ * Implements hook_tokens_alter().
+ */
+function app_module_tokens_alter(array &$replacements, array $context, BubbleableMetadata $bubbleable_metadata) {
+  $app_module_id = \Drupal::request()->query->get('app_module_id');
+  $app_module_route = \Drupal::request()->query->get('app_module_route');
+  $app_module_data = \Drupal::request()->query->get('app_module_data');
+
+  // We are not rendering an app module, so exit.
+  if (!$app_module_id) {
+    return;
+  }
+
+  // Get the app module entity.
+  /* @var \Drupal\app_module\AppModuleInterface */
+  $app_module = AppModule::load($app_module_id);
+
+  if (!$app_module) {
+    // How could this happen exactly, I don't know.
+    throw new \Exception("Request parameters indicate app module loaded, but app module does not exist.");
+  }
+
+  // Load the app module plugin.
+  /* @var \Drupal\app_module\Plugin\app_module\AppModulePluginInterface */
+  $app_module_plugin = $app_module->getAppModulePlugin();
+
+  if (!$app_module_plugin) {
+    // How could this happen exactly, I don't know.
+    throw new \Exception("Request parameters indicate app module loaded, but app module plugin could not be loaded.");
+  }
+
+  /* @var \Drupal\app_module\AppModuleRenderArrayBuilderInterface */
+  $app_module_builder = \Drupal::service('app_module.builder');
+
+  if ($app_module_plugin) {
+    $tokensToAlter = $app_module_plugin->getTokensForAltering($app_module_route, (array) $app_module_data);
+
+    if (count(array_intersect($tokensToAlter, array_keys($replacements))) !== 0) {
+      $app_module_plugin->alterTokens($replacements, $context, $app_module_route, (array) $app_module_data);
+
+      // Add cache dependencies to bubble up because we are probably
+      // overwriting tokens that come from a node. If we are doing
+      // that, then we are probably need to vary the cache context.
+      // The app_module *SHOULD* already be doing this, so the cache
+      // metadata for the app_module build will be the same as what
+      // is needed here.
+      $bubbleable_metadata->addCacheableDependency(
+        $app_module_builder->getCacheDependencyForBuild($app_module, $app_module_route, (array) $app_module_data)
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ *
+ * Make sure our page_attachments_alter comes at the very end of the
+ * implementation list. Also ensure tokens_alter comes at the very
+ * end too.
+ */
+function app_module_module_implements_alter(&$implementations, $hook) {
+  if ($hook === 'page_attachments_alter' || $hook === 'tokens_alter') {
+    $group = $implementations['app_module'];
+    unset($implementations['app_module']);
+    $implementations['app_module'] = $group;
+  }
+}

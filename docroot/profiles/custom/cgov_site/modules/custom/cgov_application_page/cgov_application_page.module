@@ -1,0 +1,164 @@
+<?php
+
+/**
+ * @file
+ * Contains cgov_application_page.module.
+ */
+
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Utility\Token;
+
+/**
+ * Implements hook_entity_insert().
+ *
+ * THIS MUST BE hook_entity NOT hook_ENTITY_TYPE or else pathauto will
+ * not fire first.
+ */
+function cgov_application_page_entity_insert(EntityInterface $entity) {
+  if ($entity->bundle() === 'cgov_application_page') {
+    /* New entity then the app path never existed. Register.
+     */
+    $app_path_svc = \Drupal::service('app_module.app_path_manager');
+    $app_path_svc->updateAppPath($entity);
+  }
+}
+
+/**
+ * Implements hook_entity_update().
+ *
+ * THIS MUST BE hook_entity NOT hook_ENTITY_TYPE or else pathauto will
+ * not fire first.
+ */
+function cgov_application_page_entity_update(EntityInterface $entity) {
+  if ($entity->bundle() === 'cgov_application_page') {
+    /* Update the app path information, or create if it did not exist
+     * before.
+     */
+    $app_path_svc = \Drupal::service('app_module.app_path_manager');
+    $app_path_svc->updateAppPath($entity);
+  }
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ *
+ * The insert and update hooks *MUST* come after pathauto.
+ */
+function cgov_application_page_module_implements_alter(&$implementations, $hook) {
+  if ($hook !== 'entity_insert' && $hook !== 'entity_update') {
+    return;
+  }
+
+  // Dutifully copying from the PHP docs to move our implementation
+  // to the end of the list.
+  $group = $implementations['cgov_application_page'];
+  unset($implementations['cgov_application_page']);
+  $implementations['cgov_application_page'] = $group;
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function cgov_application_page_theme_suggestions_html_alter(array &$suggestions, array $variables) {
+  $entity = _cgov_application_page_get_curr_entity();
+  if ($entity && $entity->getEntityTypeId() === 'node' && $entity->bundle() === "cgov_application_page") {
+    $content_type = $entity->bundle();
+    $suggestions[] = 'html__' . $content_type;
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function cgov_application_page_theme_suggestions_page_alter(array &$suggestions, array $variables) {
+  $entity = _cgov_application_page_get_curr_entity();
+  if ($entity && $entity->getEntityTypeId() === 'node' && $entity->bundle() === "cgov_application_page") {
+    $content_type = $entity->bundle();
+    $page_template = $entity->field_app_module_page_template->value;
+    if ($page_template !== NULL) {
+      $suggestions[] = 'page__' . $content_type . '__' . $page_template;
+    }
+  }
+}
+
+/**
+ * Gets the current entity if there is one.
+ *
+ * @return Drupal\Core\Entity\ContentEntityInterface
+ *   The retrieved entity, or FALSE if none found.
+ */
+function _cgov_application_page_get_curr_entity() {
+  $params = \Drupal::routeMatch()->getParameters()->all();
+  foreach ($params as $param) {
+    if (!is_object($param)) {
+      continue;
+    }
+
+    $class = new \ReflectionClass($param);
+
+    if (in_array('Drupal\Core\Entity\ContentEntityInterface', $class->getInterfaceNames())) {
+      // If you find a ContentEntityInterface stop iterating and return it.
+      return $param;
+    }
+  }
+  return FALSE;
+}
+
+/* 0000000000000000000000000000000000
+ * The next two hooks are being done to add in the
+ * page title as an attachment and not in the
+ * templates. This is so that some types of content
+ * (app_modules) can remove the title from the
+ * rendered HTML.
+ * 0000000000000000000000000000000000
+ */
+/**
+ * Implements hook_page_attachments().
+ */
+function cgov_application_page_page_attachments(array &$attachments) {
+  // If this is the entity
+  $node = \Drupal::routeMatch()->getParameter('node');
+  if(!is_object($node) || $node->bundle() !== 'cgov_application_page') {
+    return;
+  }
+
+  // We are not adding a value here as we don't want to fill in anything bogus.
+  $title_tag = [
+    '#tag' => 'title',
+  ];
+
+  $attachments['#attached']['html_head'][] = [$title_tag, 'title_tag'];
+}
+
+/**
+ * Implements template_preprocess_html().
+ */
+function cgov_application_page_preprocess_html(&$variables) {
+  // If this is the entity
+  $node = \Drupal::routeMatch()->getParameter('node');
+  if(!is_object($node) || $node->bundle() !== 'cgov_application_page') {
+    return;
+  }
+
+  // If this is the entity
+  if (!empty($variables['head_title']) && !empty($variables['page']['#attached']['html_head'])) {
+    // Find title_tag in html_head.
+    foreach ($variables['page']['#attached']['html_head'] as $delta => $tag) {
+      if ($tag[1] === 'title_tag') {
+        // Set the value of the title tag to the same thing as the configuration
+        // of the metatag module's title tag.
+        $token_service = \Drupal::token();
+        $title = Html::escape(
+          $token_service->replace(
+            '[cgov_tokens:cgov-title] - [cgov_tokens:cgov-trans-org-name]',
+            [
+              'node' => $node,
+            ]
+          )
+        );
+        $variables['page']['#attached']['html_head'][$delta][0]['#value'] = $title;
+      }
+    }
+  }
+}

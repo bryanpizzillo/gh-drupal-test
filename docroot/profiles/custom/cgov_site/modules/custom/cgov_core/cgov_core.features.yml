@@ -1,0 +1,23 @@
+excluded:
+  - user.role.authenticated
+  - user.role.content_author
+  - user.role.content_editor
+  - user.role.advanced_editor
+  - user.role.layout_manager
+  - user.role.site_admin
+  - user.role.admin_ui
+  - user.role.content_previewer
+  - user.role.blog_manager
+  - user.role.image_manager
+  - user.role.pdq_importer
+  - core.entity_view_mode.block.token
+  - core.entity_view_mode.block_content.token
+  - core.entity_view_mode.content_moderation_state.token
+  - core.entity_view_mode.file.token
+  - core.entity_view_mode.media.token
+  - core.entity_view_mode.node.token
+  - core.entity_view_mode.taxonomy_term.token
+  - cgov_core.frontend_globals
+required:
+  - simple_sitemap.settings
+  - simple_sitemap.variants.default_hreflang

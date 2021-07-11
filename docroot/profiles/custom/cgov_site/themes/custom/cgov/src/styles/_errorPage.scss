@@ -1,0 +1,130 @@
+// BEGIN 404 page redesign, NCISEO-280
+.error-page {
+  font-size: 1.125em;
+  padding: 0 20px;
+
+  .error-content {
+    margin: 0 auto;
+
+    h1 {
+      font-size: 1.75em;
+    }
+  }
+}
+
+.error-searchbar {
+  margin-bottom: 1.25em;
+
+  .searchString,
+  button {
+    display: inline-block;
+  }
+
+  .searchString {
+    width: 270px;
+    padding: 0 0 0 8px;
+    margin-right: 5px;
+  }
+
+  form {
+    padding: 0;
+    margin-bottom: 0;
+
+    legend {
+      padding-left: 0;
+      margin: 0 0 13px;
+      background: transparent;
+      font-size: inherit;
+      float: none;
+    }
+
+    fieldset {
+      margin-top: 0;
+    }
+
+    input {
+      font-size: 16px;
+    }
+
+    input,
+    button {
+      margin-bottom: 0;
+    }
+  }
+
+  .searchSubmit {
+    display: block;
+    margin: 5px 0 0;
+    width: 270px;
+  }
+
+  .choose-language-radio {
+    margin-bottom: 15px;
+
+    label {
+      margin-right: 30px;
+    }
+  }
+}
+
+@include bp(medium-up) {
+  .error-content {
+    h1 {
+      margin-top: 0.58em;
+    }
+  }
+  .error-searchbar {
+    .searchSubmit {
+      display: inline-block;
+      margin: 0;
+      width: 130px;
+    }
+  }
+}
+
+.error-page .error-content div {
+  padding: 0 0 10px;
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1
+}
+
+.error-page .error-content h1 {
+  font-size: 30px;
+  line-height: 35px;
+  margin-top: 1.4em
+}
+
+.error-page .error-content .error-content-english h1 {
+  color: #62539d
+}
+
+.error-page .error-content .error-content-spanish h1 {
+  color: #14819b
+}
+
+@media screen and (max-width: 767px) {
+  .error-page .error-content-spanish h1 {
+    margin-top: 0
+  }
+  .error-content div {
+    padding-bottom: 0
+  }
+  .error-searchbar {
+    display: block
+  }
+}
+
+@include break(tablet-ls) {
+  .error-page .error-content {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex
+  }
+  .error-page .error-content .error-content-english {
+    padding-right: 40px
+  }
+  .error-page .error-content .error-content-spanish {
+    padding-left: 40px
+  }
+}

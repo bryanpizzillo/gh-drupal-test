@@ -1,0 +1,244 @@
+@mixin sprite($x-coordinate: 0, $y-coordinate: 0, $width: 0, $height: 0) {
+	background: url($icons + "nci-sprite.png") no-repeat $x-coordinate $y-coordinate;
+	width: $width;
+	height: $height;
+}
+
+@mixin placeholder {
+	&:-moz-placeholder { @content; }
+	&::-moz-placeholder { @content; }
+	&:-ms-input-placeholder { @content; }
+	&::-webkit-input-placeholder { @content; }
+}
+
+@mixin transition($transitions...) {
+	-webkit-transition: $transitions;
+	-moz-transition: $transitions;
+	-o-transition: $transitions;
+	transition: $transitions;
+}
+@mixin transition-delay($transition-delay) {
+	-webkit-transition-delay: $transition-delay;
+	-moz-transition-delay: $transition-delay;
+	-o-transition-delay: $transition-delay;
+	transition-delay: $transition-delay;
+}
+
+@mixin transform($transforms...) {
+	-webkit-transform: $transforms;
+	-moz-transform: $transforms;
+	-ms-transform: $transforms;
+	-o-transform: $transforms;
+	transform: $transforms;
+}
+@mixin transform-origin($transform-origin) {
+	-webkit-transform-origin: $transform-origin;
+	-moz-transform-origin: $transform-origin;
+	-ms-transform-origin: $transform-origin;
+	-o-transform-origin: $transform-origin;
+	transform-origin: $transform-origin;
+}
+
+@mixin box-shadow($shadows...) {
+	-webkit-box-shadow: $shadows;
+	-moz-box-shadow: $shadows;
+	box-shadow: $shadows;
+}
+
+@mixin hCenter {
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+@mixin vCenter {
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+@mixin call-to-action-corner() {
+	text-transform: uppercase;
+	position: absolute;
+	z-index: 88;
+	padding: 0.62em;
+	color: #FFFFFF;
+	background-color: #403f3f;
+
+	// rotate the call to action:
+	right: 0;
+	@include transform-origin(top right);
+	@include transform(
+		rotate(90deg)
+		translate(100%, -1px)); // -1px to fix rendering issues
+}
+
+@mixin card-clickable {
+	// the following classes are to remove padding from the card and give it to the anchor tag so that the whole card is clickable
+	.columns {
+		padding: 0;
+		a {
+			padding: em-calc(30px);
+			display: block;
+		}
+	}
+}
+
+//Vendor prefixes
+@mixin prefix($property, $value, $vendors: webkit moz ms o) {
+	@if $vendors {
+		@each $vendor in $vendors {
+			#{$property}: #{"-" + $vendor + "-" + $value};
+		}
+	}
+	#{$property}: #{$value};
+}
+
+@mixin property-prefix($property, $value, $vendors: webkit moz ms o) {
+	@if $vendors {
+		@each $vendor in $vendors {
+			#{"-" + $vendor + "-" + $property}: #{$value};
+		}
+	}
+	#{$property}: #{$value};
+}
+
+//Flex mixins
+@mixin flexbox() {
+	display: -webkit-box;
+	display: -moz-box;
+	display: -ms-flexbox;
+	display: -webkit-flex;
+	display: flex;
+}
+@mixin flex($values) {
+	-webkit-box-flex: $values;
+	-moz-box-flex:  $values;
+	-webkit-flex:  $values;
+	-ms-flex:  $values;
+	flex:  $values;
+}
+@mixin flexcontainer() {
+	@include flexbox();
+	@include property-prefix(flex-direction,row);
+	overflow:hidden;
+	@include bp(small) {
+		@include property-prefix(flex-direction,column);
+	}
+}
+@mixin flex-order($val) {
+	-webkit-box-ordinal-group: $val;
+	-moz-box-ordinal-group: $val;
+	-ms-flex-order: $val;
+	// -webkit-order: $val;
+	order: $val;
+}
+
+
+@mixin bp-retina {
+	@media all and (-webkit-min-device-pixel-ratio: 2),
+	all and (min--moz-device-pixel-ratio: 2),
+	all and (-o-min-device-pixel-ratio: 2/1),
+	all and (min-device-pixel-ratio: 2),
+	all and (min-resolution: 192dpi),
+	all and (min-resolution: 2dppx) {
+		@content;
+	}
+}
+
+//Image background
+@mixin background-icon($image,$width,$height,
+$tablet-width:$width,$tablet-height:$height,
+$mobile-width:$width,$mobile-height:$height,
+$displayStyle:inline-block,
+$background-position:initial, $background-repeat: no-repeat,
+$container-height:$height,$tablet-container-height:$tablet-height,
+$mobile-container-height:$mobile-height) {
+	background-image: url($image);
+	background-repeat: $background-repeat;
+	background-position: $background-position;
+	display:  $displayStyle;
+	content:" ";
+	@include bp(large-up){
+		background-size: $width $height;
+		height:$container-height;
+		width: $width;
+	}
+	@include bp(medium){
+		background-size:$tablet-width $tablet-height;
+		width:$tablet-width;
+		height:$tablet-container-height;
+	}
+	@include bp(small){
+		background-size:$mobile-width $mobile-height;
+		width:$mobile-width;
+		height:$mobile-container-height;
+	}
+
+}
+@mixin standard-background-icon($standard-image, $retina-image, $width, $height,
+$tablet-width:$width,$tablet-height:$height,
+$mobile-width:$width,$mobile-height:$height,
+$displayStyle:inline-block,
+$background-position:initial,
+$container-height:$height,
+$tablet-container-height:$tablet-height,
+$mobile-container-height:$mobile-height,
+$background-repeat: no-repeat, $no-width:false) {
+	@include background-icon($standard-image,$width,$height,$tablet-width,$tablet-height,
+					$mobile-width,$mobile-height,
+					$displayStyle,$background-position,$background-repeat,$container-height,
+					$tablet-container-height,$mobile-container-height);
+	@include bp-retina {
+		@include background-icon($retina-image,$width,$height,$tablet-width,$tablet-height,
+						$mobile-width,$mobile-height,
+						$displayStyle,$background-position,$background-repeat,$container-height,
+						$tablet-container-height,$mobile-container-height);
+	}
+
+	@if $no-width == false {
+		width: $width;
+		margin-right: auto;
+		margin-left:auto;
+	}
+}
+
+//Centered Emphasized text
+@mixin centered {
+	display: block;
+	position: relative;
+	text-align: center;
+	clear:both;
+	width:100%;
+}
+@mixin centered-inline {
+	display: inline-block;
+	position: relative;
+	text-align: center;
+	clear:both;
+	margin-left:auto;
+	margin-right:auto;
+	//width:100%;
+}
+@mixin centeredEm {
+	@include centered;
+	font-style: italic;
+}
+
+@mixin vertical-center {
+	line-height: normal;
+	vertical-align: middle;
+	display:inline-block;
+}
+
+@mixin toggle-color($color, $bg-color) {
+	&[aria-expanded="false"] .toggle,
+	.toggle[aria-expanded="false"] {
+		color: $color;
+		background-color: $bg-color;
+	}
+
+	&[aria-expanded="true"] .toggle,
+	.toggle[aria-expanded="true"] {
+		color: $bg-color;
+		background-color: $color;
+	}
+}

@@ -1,0 +1,9 @@
+services:
+  pdq_core.revision_pruner:
+    class: Drupal\pdq_core\RevisionPruner
+    arguments:
+      - '@entity_type.manager'
+  pdq_core.config_overrider:
+    class: Drupal\pdq_core\PDQConfigOverrider
+    tags:
+      - {name: config.factory.override, priority: 5}
