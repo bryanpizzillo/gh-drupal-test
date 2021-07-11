@@ -35,16 +35,20 @@ jobs:
       - name: Composer install
         run: |
           composer install
+      ## Install BLT and Drush Launchers
+      - name: Install BLT and Drush Launchers
+        run: |
+          curl -sL -o /usr/local/bin/drush https://github.com/drush-ops/drush-launcher/releases/download/latest/drush.phar && chmod +x /usr/local/bin/drush
+          curl -sL -o /usr/local/bin/blt https://github.com/acquia/blt-launcher/releases/latest/download/blt.phar && chmod +x /usr/local/bin/blt
+      - name: Test
+        run: |
+          echo $PATH
+          blt
+          drush
       ## Create MySQL databases
       - name: Turn on MySQL and Create DBs
         run: |
           sudo /etc/init.d/mysql start
           mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS drupal"
           mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS simpletest"
-          mysql -u root -proot -e "GRANT ALL ON simpletest.* to 'simpletest'@'%' IDENTIFIED BY 'simpletest'"
-      ## Install BLT and Drush Launchers
-      - name: Test
-        run: |
-          echo $PATH
-          blt
-          drush
+          mysql -u root -proot -e "GRANT ALL ON simpletest.* to 'simpletest'@'%' IDENTIFIED BY 'simpletest';"
