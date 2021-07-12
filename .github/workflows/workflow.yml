@@ -45,6 +45,7 @@ jobs:
         run: |
           sudo /etc/init.d/mysql start
           mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS drupal"
+          mysql -u root -proot -e "GRANT ALL ON drupal.* to 'drupal'@'%' IDENTIFIED BY 'drupal'"
           mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS simpletest"
           mysql -u root -proot -e "GRANT ALL ON simpletest.* to 'simpletest'@'%' IDENTIFIED BY 'simpletest'"
       - name: Setup App
