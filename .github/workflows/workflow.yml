@@ -54,7 +54,7 @@ jobs:
           ## We don't set git info for right now as we are in the NCIOCPL origin right now.
       - name: Validate
         run: |
-          source ./vendor/acquia/blt/scripts/pipelines/validate
+          blt validate --define drush.alias='${drush.aliases.ci}' --ansi --verbose
       - name: Setup App
         run: |
           ## The setup app script cannot create build.json as we are in the NCIOCPL origin.
@@ -62,5 +62,15 @@ jobs:
           blt setup --define drush.alias='${drush.aliases.ci}' --environment=ci --no-interaction --ansi --verbose
       - name: Test
         run: |
-          source ./scripts/pipelines/tests
+          ## Setup Simpletest info for kernel & functional tests
+          export SIMPLETEST_BASE_URL=http://127.0.0.1:8888
+          export SIMPLETEST_DB=mysql://simpletest:simpletest@localhost/simpletest
+
+          ## Behat tests will run the server
+          blt tests:behat:run --define drush.alias='${drush.aliases.ci}' --environment=ci --define tests.run-server=true -D behat.web-driver=chrome --ansi --verbose
+
+          blt tests:server:start --define drush.alias='${drush.aliases.ci}' --environment=ci --define tests.run-server=true -D behat.web-driver=chrome --ansi --verbose
+          blt custom:paratest:run  --define drush.alias='${drush.aliases.ci}' --environment=ci --define tests.run-server=true -D behat.web-driver=chrome --ansi --verbose
+          blt tests:server:kill --define drush.alias='${drush.aliases.ci}' --environment=ci --define tests.run-server=true -D behat.web-driver=chrome --ansi --verbose
+
 ## Build Artifact here
