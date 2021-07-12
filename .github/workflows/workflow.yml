@@ -48,7 +48,13 @@ jobs:
           mysql -u root -proot -e "GRANT ALL ON drupal.* to 'drupal'@'%' IDENTIFIED BY 'drupal'"
           mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS simpletest"
           mysql -u root -proot -e "GRANT ALL ON simpletest.* to 'simpletest'@'%' IDENTIFIED BY 'simpletest'"
+      - name: Validate
+        run: |
+          source ./vendor/acquia/blt/scripts/pipelines/validate
       - name: Setup App
         run: |
-          ./vendor/acquia/blt/scripts/pipelines/setup_app
-
+          source ./scripts/pipelines/setup_app
+      - name: Test
+        run: |
+          source ./scripts/pipelines/tests
+## Build Artifact here
