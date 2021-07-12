@@ -44,16 +44,22 @@ jobs:
       - name: Turn on MySQL and Create DBs
         run: |
           sudo /etc/init.d/mysql start
+      - name: Setup Env
+        run: |
+          ## The setup env script does a few things we cannot.
           mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS drupal"
           mysql -u root -proot -e "GRANT ALL ON drupal.* to 'drupal'@'%' IDENTIFIED BY 'drupal'"
           mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS simpletest"
           mysql -u root -proot -e "GRANT ALL ON simpletest.* to 'simpletest'@'%' IDENTIFIED BY 'simpletest'"
+          ## We don't set git info for right now as we are in the NCIOCPL origin right now.
       - name: Validate
         run: |
           source ./vendor/acquia/blt/scripts/pipelines/validate
       - name: Setup App
         run: |
-          source ./scripts/pipelines/setup_app
+          ## The setup app script cannot create build.json as we are in the NCIOCPL origin.
+          export PHANTOMJS_CDNURL=https://npm.taobao.org/mirrors/phantomjs
+          blt setup --define drush.alias='${drush.aliases.ci}' --environment=ci --no-interaction --ansi --verbose
       - name: Test
         run: |
           source ./scripts/pipelines/tests
