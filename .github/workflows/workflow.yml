@@ -3,7 +3,7 @@ on: [ push, pull_request ]
 jobs:
   build:
     name: Build, Test and Upload Artifacts
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       ## This clones and checks out.
       - name: Checkout branch
@@ -40,15 +40,10 @@ jobs:
         run: |
           curl -sL -o /usr/local/bin/drush https://github.com/drush-ops/drush-launcher/releases/download/0.6.0/drush.phar && chmod +x /usr/local/bin/drush
           curl -sL -o /usr/local/bin/blt https://github.com/acquia/blt-launcher/releases/latest/download/blt.phar && chmod +x /usr/local/bin/blt
-      - name: Test
-        run: |
-          echo $PATH
-          blt
-          drush
       ## Create MySQL databases
       - name: Turn on MySQL and Create DBs
         run: |
           sudo /etc/init.d/mysql start
           mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS drupal"
           mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS simpletest"
-          mysql -u root -proot -e "GRANT ALL ON simpletest.* to 'simpletest'@'%' IDENTIFIED BY 'simpletest';"
+          mysql -u root -proot -e "GRANT ALL ON simpletest.* to 'simpletest'@'%' IDENTIFIED BY 'simpletest'"
