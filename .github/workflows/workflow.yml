@@ -61,9 +61,10 @@ jobs:
           export PHANTOMJS_CDNURL=https://npm.taobao.org/mirrors/phantomjs
           blt setup --define drush.alias='${drush.aliases.ci}' --environment=ci --no-interaction --ansi --verbose
       - name: Test
+        timeout-minutes: 10
         run: |
           ## Setup Simpletest info for kernel & functional tests
-          export SIMPLETEST_BASE_URL=http://localhost:8888
+          export SIMPLETEST_BASE_URL=http://127.0.0.1:8888
           export SIMPLETEST_DB=mysql://simpletest:simpletest@localhost/simpletest
 
           blt tests --define drush.alias='${drush.aliases.ci}' -D behat.web-driver=chrome --no-interaction --ansi --verbose
