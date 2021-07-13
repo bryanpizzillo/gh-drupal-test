@@ -73,8 +73,9 @@ jobs:
           blt tests:behat:run --define drush.alias='${drush.aliases.ci}' --environment=ci --define tests.run-server=true -D behat.web-driver=chrome --ansi --verbose
 
           ## PHP Unit tests do not start the server
-          blt tests:server:start --define drush.alias='${drush.aliases.ci}' --environment=ci --define tests.run-server=true -D behat.web-driver=chrome --ansi -vvv
+          ##blt tests:server:start --define drush.alias='${drush.aliases.ci}' --environment=ci --define tests.run-server=true -D behat.web-driver=chrome --ansi -vvv
+          drush rs 0.0.0.0:8888
           blt tests:phpunit:run  --define drush.alias='${drush.aliases.ci}' --environment=ci --define tests.run-server=true -D behat.web-driver=chrome --ansi -vvv
-          blt tests:server:kill --define drush.alias='${drush.aliases.ci}' --environment=ci --define tests.run-server=true -D behat.web-driver=chrome --ansi --vvv
+          ##blt tests:server:kill --define drush.alias='${drush.aliases.ci}' --environment=ci --define tests.run-server=true -D behat.web-driver=chrome --ansi --vvv
 
 ## Build Artifact here
