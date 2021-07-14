@@ -49,13 +49,13 @@
       <file>./tests/TestSuites/FunctionalJavascriptTestSuite.php</file>
     </testsuite>
   </testsuites>
-  <listeners>
-    <!-- listener class="\Drupal\Tests\Listeners\DrupalListener">
-    </listener -->
-    <!-- The Symfony deprecation listener has to come after the Drupal listener -->
-    <!-- listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener">
-    </listener -->
-  </listeners>
+  <!-- The Symfony deprecation listener has to come after the Drupal listener -->
+  <!-- listeners>
+    <listener class="\Drupal\Tests\Listeners\DrupalListener">
+    </listener>
+    <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener">
+    </listener>
+  </listeners -->
   <!-- Filter for coverage reports. -->
   <filter>
     <whitelist>
@@ -65,7 +65,10 @@
       <directory>../modules</directory>
       <directory>../sites</directory>
       <!-- Exclude all test modules, tests etc -->
-      <exclude-pattern>*/tests/*</exclude-pattern>
+      <exclude>
+        <directory>*/tests/*</directory>
+        <directory>*/Tests/*</directory>
+      </exclude>
      </whitelist>
   </filter>
 </phpunit>
